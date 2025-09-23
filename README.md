@@ -1,45 +1,100 @@
-MATH261A-project-template
-Example project repository for MATH 261A at San José State University.
+California Water Rights Allocation – Simple Linear Regression Analysis
+Course: MATH261A – San José State University
+Author: Lasya Ramachandruni
+Date: September 24, 2025
 
-Project Overview
-This repository documents a full data analysis project conducted for the MATH 261A course. The main goal is to apply statistical and data science techniques (e.g., regression, modeling, prediction) to a real-world dataset, communicate results through reproducible analysis, and write a report following academic standards.
+Overview
+This repository presents a complete analysis of California surface water allocations using a Simple Linear Regression (SLR) approach. The primary objective is to estimate the mean difference in annual water allocation between "Appropriative" and "Other Types" water rights, and to document the full workflow including limitations encountered in real data analysis.
 
-Data
-Source:
-Data used in this project is obtained from San Francisco Open Data, provided under the Open Data Commons Public Domain Dedication and License.
+Folder Structure
+/data:
 
-Description:
-The dataset covers [briefly describe the topic, e.g. "energy usage trends", "crime incidents", "property assessment records", etc.].
-Any necessary preprocessing, cleaning, or transformation steps will be described in the analysis section.
+raw_data.csv: Raw water rights data as downloaded from the California Open Data portal.
 
-Analysis
-All statistical analysis and visualizations will be performed in R, organized in the /analysis folder.
-Methods include regression modeling, exploratory data analysis, and reproducible code practices (with scripts and R Markdown files).
+clean_data.csv: Data cleaned and transformed for regression analysis.
 
-Report
-The final report is written using Quarto (see /paper folder).
-References are managed with BibTeX; citations and bibliography are included using a .bib file.
+/analysis:
 
-External Resources
-Statement:
-The final report and code were written by Lasya Ramachandruni, with support from valuable external resources and tools referenced throughout the project.
+R scripts for data import, cleaning, regression model fitting, diagnostics (including outlier/influence checks), and plotting.
 
-LLM-based chatbots (e.g., ChatGPT Edu) for coding and explanations
+/paper:
 
-Online forums (e.g., Stack Overflow, RStudio Community) for troubleshooting
+Project report written in Quarto/R Markdown, rendered as PDF.
 
-Academic literature and data documentation for methodological grounding
+Final tables, graphics, and reference files.
 
-R, RStudio, and version control via Git/GitHub
+Project Workflow
+Data Preparation:
 
-How to Run
-Open the project in RStudio (MATH261A-project-template.Rproj)
+The original dataset is cleaned and transformed, with a binary variable constructed for the predictor (Appropriative: 1, Other Types: 0).
 
-Install required R packages from the setup script or README instructions.
+Major data features and quality issues (outliers, missingness) are summarized.
 
-Run analysis scripts from /analysis/.
+Regression Modeling:
 
-Compile the report using Quarto in /paper/.
+A classical SLR model: $Y_i = \beta_0 + \beta_1 X_i + \epsilon_i$
+
+Parameters estimated using least squares.
+
+Inference and Diagnostics:
+
+Hypothesis testing, confidence intervals, and prediction intervals produced.
+
+Diagnostics include:
+
+Residuals vs Fitted and Observation Order plots
+
+Normality of errors (Q-Q plot)
+
+Influence statistics (Cook’s distance)
+
+Heteroscedasticity tests
+
+All diagnostic results are incorporated into discussion and documentation of model limitations.
+
+Reporting:
+
+Report written in Quarto, emphasizing reproducibility, transparency, and explicit discussion of all assumptions and findings.
+
+Figures and tables placed in /paper for easy review.
+
+Data Source and License
+Dataset: California Water Rights List
+
+Source: California Open Data
+
+License: Open Data Commons Public Domain Dedication and License (PDDL 1.0)
+
+This project exclusively uses public domain government data.
+
+How to Reproduce/Run
+Open the project in RStudio using the provided .Rproj file.
+
+Install required packages (see setup instructions in /analysis scripts).
+
+Run scripts in /analysis to clean and analyze the data.
+
+Compile the report in /paper using Quarto (or R Markdown) to produce the final PDF.
+
+Key Findings & Limitations
+SLR detects a significant mean difference in allocation between Appropriative and Other Types.
+
+Diagnostics reveal severe violations of constant variance and normality; influential outliers are present.
+
+Model interpretation and prediction intervals should be considered unreliable except for robust group mean estimates.
+
+All caveats and limitations are rigorously documented.
+
+References
+California Open Data Portal: https://data.ca.gov/
+
+R Project: https://cran.r-project.org/
+
+Quarto: https://quarto.org/
+
+Open Data Commons PDDL License: https://opendatacommons.org/licenses/pddl/1-0/
 
 Acknowledgments
-This project repository is based on the template provided by Rohan Alexander, with additional guidance from the SJSU MATH 261A course team.
+SJSU MATH261A faculty and staff for guidance.
+
+Template and code support from Open Data initiatives and online communities (RStudio Community, Stack Overflow, ChatGPT Edu).
