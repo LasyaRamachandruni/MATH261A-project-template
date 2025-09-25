@@ -102,5 +102,5 @@ This project exclusively uses **public domain government data**.
 ---
 
 ## 🙏 Acknowledgments  
-- **SJSU MATH261A** faculty and staff for guidance.  
-- Open Data initiatives and online communities (**RStudio Community**, **Stack Overflow**, **ChatGPT Edu**) for template/cod
+- **SJSU MATH261A** faculty and staff for guidance.
+- Open Data initiatives and online communities (**RStudio Community**, **Stack Overflow**, **ChatGPT Edu**) for template/code checks
