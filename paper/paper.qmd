@@ -5,20 +5,7 @@ author: "Lasya Ramachandruni"
 thanks: "Project repository available at: [https://github.com/LasyaRamachandruni/MATH261A-project-template/](https://github.com/LasyaRamachandruni/MATH261A-project-template/)."
 date: today
 date-format: long
-abstract: "This study employs Simple Linear Regression (SLR) to analyze the California Water Rights List and assess whether legal classification as an Appropriative right is a significant predictor of allocated water volume. Our findings reveal a highly statistically significant difference (
-p
-<
-2
-×
-10
-−
-16
-p<2×10 
-−16
- ): holders of Appropriative rights receive, on average, approximately 17,881 acre-feet per year more than holders of other types of water rights. However, thorough model diagnostics uncovered severe violations of core SLR assumptions, namely heteroscedasticity and non-normality, compounded by the presence of highly influential outliers. These issues resulted in a near-zero R-squared value, despite the statistical significance of the group mean comparison. Consequently, while the SLR model robustly detects differences in mean allocations between groups, the resulting prediction intervals—spanning over 
-±
-400,000
-±400,000 acre-feet per year—are so wide that the model cannot be used for any reliable prediction of individual water allocations in practice. "
+abstract: "This study employs Simple Linear Regression (SLR) to analyze the California Water Rights List and assess whether legal classification as an Appropriative right is a significant predictor of allocated water volume. Our findings reveal a highly statistically significant difference ($p < 2 \\times 10^{-16}$): holders of Appropriative rights receive, on average, approximately 17,881 acre-feet per year more than holders of other types of water rights. However, thorough model diagnostics uncovered severe violations of core SLR assumptions, namely heteroscedasticity and non-normality, compounded by the presence of highly influential outliers. These issues resulted in a near-zero R-squared value, despite the statistical significance of the group mean comparison. Consequently, while the SLR model robustly detects differences in mean allocations between groups, the resulting prediction intervals—spanning over $\\pm 400,000$ acre-feet per year—are so wide that the model cannot be used for any reliable prediction of individual water allocations in practice."
 format: pdf
 bibliography: references.bib
 execute:
@@ -40,8 +27,6 @@ library(car)
 # ----- 2) Data path (parameterized) -----
 data_path <- params$data_path
 ```
-
-
 
 ```{r}
 #| results: asis
@@ -92,64 +77,88 @@ pred1    <- predict(fit, newdata = data.frame(x = 1), interval = "prediction")
 # Vectors for diagnostics
 resid_vec  <- resid(fit)
 fitted_vec <- fitted(fit)
+
+n_final <- nrow(clean_data)
 ```
 
 # Introduction {#sec-intro}
 
-The distribution and management of water rights represent a critical challenge in California, impacting environmental sustainability and economic activity. This study analyzes the quantitative relationship between legal right type and the volume of water allocated. Drawing on the California Water Rights List, our research addresses a core question: **Does a water right designated as “Appropriative” predict a larger mean allocated water volume (Y) compared to other types of rights (X)?**
-This study employs Simple Linear Regression (SLR) to analyze the California Water Rights List [@ca_open_data_2025], using R [@r_core_team_2025], RStudio [@rstudio_team_2025], and the tidyverse [@tidyverse_package] and car [@car_package] packages. Diagnostics and methodology closely follow Fox and Weisberg [@fox_car_2019] and Kutner et al. [@kutner_applied_2005].
-We employ Simple Linear Regression (SLR) with a single binary predictor derived from the categorical right type. This provides a direct test of **mean group differences**.
+The distribution and management of water rights represent a critical challenge in California, impacting environmental sustainability and economic activity. This study analyzes the quantitative relationship between legal right type and the volume of water allocated. Drawing on the California Water Rights List, our research addresses a core question: **Does a water right designated as "Appropriative" predict a larger mean allocated water volume (Y) compared to other types of rights (X)?**
 
-The analysis establishes a highly statistically significant difference in mean allocations, confirming that Appropriative rights are, on average, associated with larger volumes. However, a transparent and reproducible diagnostic review shows **severe violations** of key assumptions. Consequently, while the model reliably compares **group means**, it is **unsuitable for predicting** individual allocations. The sections that follow outline the data ([Data](#sec-data)), the model and checks ([Methods](#sec-methods)), the quantitative findings and figures ([Results](#sec-results)), and sources ([References](#sec-ref)).
+This study employs Simple Linear Regression (SLR) to analyze the California Water Rights List [@ca_open_data_2025], using R [@r_core_team_2025], RStudio [@rstudio_team_2025], and the tidyverse [@tidyverse_package] and car [@car_package] packages. Diagnostics and methodology closely follow Fox and Weisberg [@fox_car_2019] and Kutner et al. [@kutner_applied_2005]. We employ Simple Linear Regression (SLR) with a single binary predictor derived from the categorical right type. This provides a direct test of **mean group differences**.
+
+The analysis establishes a highly statistically significant difference in mean allocations, confirming that Appropriative rights are, on average, associated with larger volumes. However, a transparent and reproducible diagnostic review shows **severe violations** of key assumptions. Consequently, while the model reliably compares **group means**, it is **unsuitable for predicting** individual allocations. The sections that follow outline the data ([Data](#sec-data)), the model and checks ([Methods](#sec-methods)), the quantitative findings and figures ([Results](#sec-results)), understanding the results and the model's limitations and sources ([Discussion](#sec-disc)), and ([References](#sec-ref)).
 
 # Data {#sec-data}
+
 **Source:**  
 The raw data is provided by the California Water Rights List [@ca_open_data_2025] via the California Open Data Portal [@ca_open_data]. Data wrangling and cleaning were performed in R [@r_core_team_2025] with the tidyverse [@tidyverse_package]. Each observational unit corresponds to a single, official water right record registered within the state.
 
 **Variables:**  
 - **Outcome ($Y$):** The dependent variable is `face_value_amount`, representing the annual volume of water allocated to each right, measured in acre-feet per year. This variable is quantitative and highly right-skewed, with a handful of extremely large values (extreme outliers).
-- **Predictor ($X$):** The main independent variable is `is_approp`, a binary indicator defined as 1 if a record is classified as “Appropriative”, and 0 if it represents any other kind of legal right. This was constructed based on the categorical variable `water_right_type` as reported in the source data.
+- **Predictor ($X$):** The main independent variable is `is_approp`, a binary indicator defined as 1 if a record is classified as "Appropriative", and 0 if it represents any other kind of legal right. This was constructed based on the categorical variable `water_right_type` as reported in the source data.
 
 **Data Cleaning & Preprocessing:**  
-Prior to any statistical analysis, the raw dataset was rigorously preprocessed. All records containing missing or undefined values for either `face_value_amount` or `water_right_type` were excluded, ensuring that only complete cases entered the modeling stage. The categorical variable `water_right_type` was then converted into a binary indicator (`is_approp`) that flags Appropriative rights with a value of 1, and all other types (e.g., Riparian, Statement) with 0. No further transformations were performed at this stage, as the initial purpose was to conduct a baseline group mean comparison before considering additional remedies such as log transformation or robust regression.
+Prior to any statistical analysis, the raw dataset was rigorously preprocessed. All records containing missing or undefined values for either `face_value_amount` or `water_right_type` were excluded, ensuring that only complete cases entered the modeling stage. The categorical variable `water_right_type` was then converted into a binary indicator (`is_approp`) that flags Appropriative rights with a value of 1, and all other types (e.g., Riparian, Statement) with 0. 
+
+After cleaning, the final analytic sample included **`r format(n_final, big.mark=",")`** water rights records. No further transformations were performed at this stage, as the initial purpose was to conduct a baseline group mean comparison before considering additional remedies such as log transformation or robust regression.
+
 ```{r}
 #| label: fig-boxplot
-#| fig-cap: "Boxplot of allocated water volume by legal right type. Appropriative rights exhibit a higher median allocation, but both groups show substantial variability and many outliers."
-#| fig-width: 4
-#| fig-height: 3
-#| out.width: "60%"
-boxplot(face_value_amount ~ is_approp, data = clean_data,
-names = c("Other Types", "Appropriative"),
-ylab = "Allocated Water Volume (acre-feet/year)",
-xlab = "Right Type",
-col = c("lightgray", "steelblue"),
-main = "Distribution of Allocated Water Volume by Legal Right Type")
-options(scipen = 6)
+#| fig-cap: "Boxplot illustrating allocated water volumes split by legal right type (Appropriative vs. Other). The y-axis uses a logarithmic scale to improve visibility of the distribution and outlier structure. Appropriative rights show higher median and mean allocations, with several extreme outliers visible above the upper whisker."
+#| fig-width: 6
+#| fig-height: 4
+#| out-width: "70%"
+
+library(ggplot2)
+
+ggplot(clean_data, aes(
+    x = factor(is_approp, labels = c("Other Types", "Appropriative")),
+    y = face_value_amount,
+    fill = factor(is_approp)
+  )) +
+  geom_boxplot(width = 0.5, outlier.shape = 18, outlier.color = "firebrick", 
+               position = position_dodge(width = 0.6)) +
+  scale_y_log10(
+    breaks = scales::trans_breaks("log10", function(x) 10^x),
+    labels = scales::trans_format("log10", scales::math_format(10^.x))
+  ) +
+  scale_fill_manual(values = c("lightgray", "steelblue")) +
+  labs(
+    x = "Right Type",
+    y = "Allocated Water Volume (acre-feet/year, log scale)",
+    title = "Boxplot of Allocated Water Volume by Right Type (log scale)"
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(legend.position = "none")
 ```
+
 ```{r}
 #| label: fig-histogram
-#| fig-cap: "Histogram of water allocations (all legal types), showing heavy right skew and extreme upper-tail outliers."
-#| fig-width: 4
-#| fig-height: 3
-#| out.width: "60%"
-hist(clean_data$face_value_amount,
-breaks = 60,
-main = "Histogram of Water Allocations (All Rights)",
-xlab = "Allocated Water Volume (acre-feet/year)",
-col = "skyblue",
-border = "white")
-axis(1, at = pretty(clean_data$face_value_amount, n = 10), las = 1)
+#| fig-cap: "Histogram of annual water allocations for all legal right types. The distribution is highly right-skewed, with most water rights clustered at lower allocation volumes (under 50,000 acre-feet/year) and a long tail extending toward very large allocations. This skewness indicates the presence of extreme outliers and suggests potential violations of regression normality assumptions."
+#| fig-width: 6
+#| fig-height: 4
+#| out-width: "70%"
 
+ggplot(clean_data, aes(x = face_value_amount)) +
+  geom_histogram(bins = 60, fill = "skyblue", color = "white") +
+  labs(title = "Histogram of Water Allocations (All Rights)",
+       x = "Allocated Water Volume (acre-feet/year)",
+       y = "Frequency") +
+  theme_minimal(base_size = 14)
 ```
-**Characteristics & Limitations:**  
-Exploratory analyses using boxplots and histograms (Figures @fig-boxplot and @fig-histogram) provide insight into the cleaned dataset. Figure @fig-boxplot shows that Appropriative rights have a higher average and median allocation than other rights, but exhibit wide variability, with several notable outlier records above the box. Figure @fig-histogram further demonstrates the highly right-skewed distribution of water allocations overall, as most rights are clustered at low volumes while a minority receive very large allocations. Together, these visualizations confirm that even with mean differences by group, the large variability and outlier prevalence pose significant challenges for regression modeling and interpretation.
 
+**Data Limitations:**  
+While this dataset provides comprehensive information on California water rights, it has several important limitations. The data only captures rights as recorded by the state administrative system and may not reflect actual water use or enforcement. The extreme right-skewness and presence of outliers suggest that a small number of very large allocations (likely for agricultural or municipal use) dominate the distribution. Additionally, the dataset lacks contextual variables such as geographic location, purpose of use, or temporal dynamics, which could explain additional variance in allocations.
+
+**Exploratory Data Analysis:**  
+Figures @fig-boxplot and @fig-histogram provide visual insight into the distribution of water allocations. Figure @fig-boxplot shows that Appropriative rights have a higher median and mean allocation than other rights, but exhibit wide variability with several extreme outliers. The logarithmic y-axis improves visualization without transforming the actual data used in regression. Figure @fig-histogram confirms the highly right-skewed distribution, with most allocations clustered at low volumes while a minority receive very large amounts. These visualizations highlight the modeling challenges posed by skewness and outliers.
 
 # Methods {#sec-methods}
+
 Model diagnostic and regression procedures followed best practices as outlined by Fox and Weisberg [@fox_car_2019], Kutner et al. [@kutner_applied_2005], and Gelman et al. [@gelman_regression_2020].
 
 We fit a Simple Linear Regression (SLR) model to evaluate the association between legal right type and allocated water volume. For each water right record $i$, the model is specified as:
-
 
 $$
 Y_i = \beta_0 + \beta_1 X_i + \epsilon_i
@@ -167,6 +176,7 @@ Model parameters were estimated using Ordinary Least Squares (OLS), minimizing t
 
 **Assumptions and Diagnostics:**  
 The model relies on four primary statistical assumptions:
+
 - *Independence*: Likely valid for cross-sectional administrative records.
 - *Linearity/Additivity*: Assured by the binary nature of $X$.
 - *Constant Variance (Homoscedasticity)*: Checked using residual plots; evidence of violation detected.
@@ -175,41 +185,42 @@ The model relies on four primary statistical assumptions:
 **Influence Assessment:**  
 Influential observations were identified using Cook's distance, with spikes indicating records that disproportionately impact parameter estimates.
 
-Diagnostic plots were generated to visually assess these assumptions and guide interpretation of model validity.
-We assess **Cook’s distance** to identify observations exerting disproportionate influence on the slope and intercept (see @fig-cook).
+Diagnostic plots were generated to visually assess these assumptions and guide interpretation of model validity. We assess **Cook's distance** to identify observations exerting disproportionate influence on the slope and intercept (see @fig-cook).
 
-# Results{#sec-results}
+# Results {#sec-results}
 
 The fitted Simple Linear Regression model reveals a statistically significant difference in mean allocated water volumes between Appropriative and other water right types. Coefficient estimates, fit metrics, and uncertainty measures are summarized below.
+
 ```{r}
 #| label: tbl-summary
 #| tbl-cap: "Summary of fitted SLR model: coefficient estimates, uncertainty, and fit metrics."
+
 summary_tbl <- tibble::tibble(
   Term = c("Intercept (Other Types Mean)",
            "Slope (Difference for Appropriative)",
-           "R^2",
+           "R-squared",
            "MSE",
            "t-statistic (Slope)",
            "p-value (Slope)"),
   Value = c(
-    format(round(coefs[1], 0), big.mark=","),       # Intercept
-    format(round(coefs[2], 0), big.mark=","),       # Slope
-    signif(r2, 3),                                  # R^2
-    format(round(sigma2, 0), big.mark=","),         # MSE
-    signif(t_b1, 3),                                # t-stat (slope)
-    signif(p_b1, 3)                                 # p-value (slope)
+    format(round(coefs[1], 0), big.mark=","),
+    format(round(coefs[2], 0), big.mark=","),
+    signif(r2, 3),
+    format(round(sigma2, 0), big.mark=","),
+    signif(t_b1, 3),
+    signif(p_b1, 3)
   )
 )
 knitr::kable(summary_tbl, align = "l")
-
 ```
 
-All visualizations and statistical checks were performed using the car [@car_package] and tidyverse [@tidyverse_package] packages in RStudio [@rstudio_team_2025]
+All visualizations and statistical checks were performed using the car [@car_package] and tidyverse [@tidyverse_package] packages in RStudio [@rstudio_team_2025].
 
 **Interpretation:**  
 Appropriative right holders receive, on average, approximately `r format(round(coefs[2], 0), big.mark=",")` acre-feet/year more than other types. However, the R-squared value is extremely low (`r signif(r2,3)`), showing that legal status explains only a small fraction of the variance.
 
 **Model Uncertainty:**  
+
 - 95% CI for mean allocation (Other Types): `r paste0("[ ", format(round(ci_fit[1,1],0), big.mark=","), ", ", format(round(ci_fit[1,2],0), big.mark=","), " ]")`  
 - 95% CI for mean difference (Appropriative vs Other): `r paste0("[ ", format(round(ci_fit[2,1],0), big.mark=","), ", ", format(round(ci_fit[2,2],0), big.mark=","), " ]")`  
 - 95% prediction intervals for new observations:  
@@ -222,37 +233,68 @@ To examine the validity of these findings, we conducted formal and visual diagno
 
 ```{r}
 #| label: fig-resid
-#| fig-cap: "Residuals versus fitted values: dramatic increase in variance confirms severe heteroscedasticity."
-#| fig-width: 4
-#| fig-height: 3
-#| out.width: "60%"
-plot(fitted_vec, resid_vec,
-xlab = "Fitted values", ylab = "Residuals",
-main = "Residuals vs Fitted Values")
-abline(h = 0, lty = 2)
+#| fig-cap: "Residuals vs Fitted Values plot for assessing homoscedasticity. While the plot does not show a pronounced fan shape, the wide spread of residuals across all fitted values reflects high underlying variability in water allocations. The presence of extreme outliers contributes to this spread, suggesting potential heteroscedasticity that may affect the reliability of standard errors and prediction intervals."
+
+ggplot(data.frame(fitted = fitted_vec, resid = resid_vec), 
+       aes(x = fitted, y = resid)) +
+  geom_point(alpha = 0.7, color = "steelblue") +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  labs(x = "Fitted Values", y = "Residuals", 
+       title = "Residuals vs Fitted Values") +
+  theme_minimal(base_size = 14)
 ```
+
 ```{r}
 #| label: fig-qq
-#| fig-cap: "Normal Q–Q plot of residuals: pronounced tail deviations highlight non-normality and presence of outliers."
-#| fig-width: 4
-#| fig-height: 3
-#| out.width: "60%"
-car::qqPlot(resid_vec, main = "Normal Q–Q Plot of Residuals")
+#| fig-cap: "Normal Q-Q plot of standardized residuals. Pronounced deviations from the reference line in both tails indicate severe departures from normality. The heavy-tailed distribution, driven by extreme outliers in the water allocation data, violates the assumption that errors are normally distributed, which affects the validity of confidence intervals and hypothesis tests."
+
+library(ggplot2)
+
+data.frame(resid = resid_vec) %>%
+  ggplot(aes(sample = resid)) +
+  stat_qq(color = "firebrick") +
+  stat_qq_line() +
+  labs(title = "Normal Q-Q Plot of Residuals") +
+  theme_minimal(base_size = 14)
 ```
+
 ```{r}
 #| label: fig-cook
-#| fig-cap: "Cook’s distance plot: vertical spikes mark observations with disproportionate influence on model fit."
-#| fig-width: 4
-#| fig-height: 3
-#| out.width: "60%"
-plot(fit, which = 4)
+#| fig-cap: "Cook's Distance plot identifying influential observations. Tall vertical spikes indicate water right records that exert disproportionate influence on the regression coefficients. These high-leverage outliers can substantially alter the estimated slope and intercept, highlighting the model's sensitivity to extreme values in the dataset."
+
+infl <- influence.measures(fit)
+cooks <- infl$infmat[,"cook.d"]
+ggplot(data.frame(obs = seq_along(cooks), cooks = cooks), 
+       aes(x = obs, y = cooks)) +
+  geom_segment(aes(xend = obs, yend = 0), color = "darkred") +
+  labs(x = "Observation", y = "Cook's Distance", 
+       title = "Cook's Distance Plot") +
+  theme_minimal(base_size = 14)
 ```
-Figures @fig-resid and @fig-qq highlight clear violations of homoscedasticity and normality, together with pronounced outlier effects. Figure @fig-cook identifies highly influential observations whose presence alters the model’s parameters substantially.
 
-Despite a strong group mean difference, the extreme variability within groups, the presence of influential records, and wide prediction intervals reveal the limits of simple regression for this dataset. For policymakers, this means legal rights alone cannot predict individual allocations reliably; for data scientists, it underscores the necessity of diagnostic rigor and transparent communication.
+Figure @fig-resid shows that the residuals vs fitted values plot does not display a pronounced "fan shape," suggesting no strong visual evidence of increasing variance (heteroscedasticity) across the range of fitted values. However, the spread of residuals is wide, reflecting the underlying data's inherent variability and presence of outliers, so subtle heteroscedasticity cannot be ruled out entirely.
 
-Potential improvements include log transformation, robust regression, or the inclusion of additional predictors (such as geography or year) to account for the data’s underlying complexity.
+Figure @fig-qq reveals clear violations of the normality assumption—major deviations from the diagonal line and heavy tails indicate the presence of extreme outliers and non-normal error distribution.
 
+Figure @fig-cook highlights several highly influential observations (with large Cook's distances), whose presence substantially alters the regression model's parameter estimates and overall fit.
+
+# Discussion {#sec-disc}
+
+This study applied simple linear regression to test whether legal classification as an Appropriative right predicts larger mean water allocations in California. The results confirm a statistically significant mean difference: holders of Appropriative rights, on average, are allocated substantially more water than those with other types of rights. However, regression diagnostics and summary statistics point to serious modeling challenges.
+
+First, the R-squared value is exceedingly low, indicating that legal status explains very little of the total variation in water allocations across the dataset. Visualizations and diagnostic plots show that extreme skew, broad within-group variability, and numerous outliers dominate the sample, making individual prediction unreliable. The normal Q-Q plot and Cook's distance diagram further reveal that a small proportion of records are highly influential and drive deviations from standard regression assumptions.
+
+While group mean differences are highly significant, these results do not imply that legal status alone can predict or explain an individual's allocation. Prediction intervals encompass a wide range—frequently spanning hundreds of thousands of acre-feet—underscoring the limits of SLR for practical forecasting in this setting.
+
+**Limitations:** The analysis is limited to a single binary predictor. Lack of additional covariate information (e.g., geography, year, use case, or other right features) likely omits relevant complexity, and the extreme outlier structure inflates uncertainty. The model also assumes independence of observations, which may not hold if some water rights are related (e.g., multiple rights held by the same entity).
+
+**Future Directions:** To improve model explanatory power and robustness, future research should:
+
+- Incorporate additional predictors to capture heterogeneity in allocations
+- Use log transformation or robust regression to mitigate the impact of skew and outliers
+- Consider nonparametric or quantile-based models for data with non-normal, heavy-tailed distributions
+
+Transparent reporting of model limitations and data features, as demonstrated here, is a critical prerequisite for building more accurate and useful predictive models of California water allocations.
 
 # References {#sec-ref}
 
