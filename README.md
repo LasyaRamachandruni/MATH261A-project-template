@@ -104,3 +104,12 @@ This project exclusively uses **public domain government data**.
 ## 🙏 Acknowledgments  
 - **SJSU MATH261A** faculty and staff for guidance.  
 - Open Data initiatives and online communities (**RStudio Community**, **Stack Overflow**, **ChatGPT Edu**) for template/cod
+
+## License
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## External Tools and Resources
+- Data source: California State Water Resources Control Board Open Data Portal
+- Analysis performed using R (v4.x.x) with packages: tidyverse, car, ggplot2
+- No external preprocessing tools or proprietary software were used
+- 
